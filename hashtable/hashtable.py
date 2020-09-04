@@ -44,7 +44,12 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        count = 0
+        for entry in self.capacity:
+            if entry is not None:
+                count+=1
+
+        return count / self.get_num_slots()
 
 
     def fnv1(self, key):
@@ -63,7 +68,16 @@ class HashTable:
 
         Implement this, and/or FNV-1.
         """
-        # Your code here
+
+        # Initialize hash variable
+        hash = 5381
+
+        # Loop through each character in the key
+        for char in key:
+            # << shifts bits to the left
+            hash = ((hash << 5) + hash) + ord(char)
+
+        return hash & 0xFFFFFFFF 
 
 
     def hash_index(self, key):
@@ -82,7 +96,9 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        idx = self.hash_index(key)
+        self.buckets[idx] = value
+
 
 
     def delete(self, key):
@@ -93,7 +109,14 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        idx = self.hash_index(key)
+
+        if self.buckets[idx] is not None:
+            self.buckets[idx] = None
+
+        else:
+            raise Exception('invalid key provided')
+        
 
 
     def get(self, key):
@@ -104,7 +127,9 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        idx = self.hash_index(key)
+
+        return self.buckets[idx]
 
 
     def resize(self, new_capacity):
@@ -114,7 +139,11 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        # new_buckets = [None] * new_capacity
+
+        # create new array
+        # find all non None indices
+        # reverse hash 
 
 
 
