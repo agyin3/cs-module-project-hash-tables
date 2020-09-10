@@ -16,7 +16,10 @@ class HashTable:
             self.capacity = capacity
         else:
             self.capacity = MIN_CAPACITY
-        self.buckets = [HashLinkedList()] * self.capacity
+        
+        self.buckets = [None] * self.capacity
+        for idx in range(self.capacity):
+            self.buckets[idx] = HashLinkedList()
 
 
     def get_num_slots(self):
@@ -39,10 +42,9 @@ class HashTable:
         Implement this.
         """
         count = 0
-        for entry in self.capacity:
-            if entry is not None:
-                count+=1
-
+        for ll in self.buckets:
+            count += ll.get_length()
+        
         return count / self.get_num_slots()
 
 
@@ -90,6 +92,12 @@ class HashTable:
 
         Implement this.
         """
+        load_factor = self.get_load_factor()
+
+        if load_factor >= 0.7:
+            new_capacity = self.capacity * 2
+            self.resize(new_capacity)
+
         idx = self.hash_index(key)
         existing_node = self.buckets[idx].contains(key)
 
@@ -110,6 +118,13 @@ class HashTable:
 
         Implement this.
         """
+
+        load_factor = self.get_load_factor()
+
+        if load_factor <= 0.2:
+            new_capacity = self.capacity // 2
+            self.resize(new_capacity)
+
         idx = self.hash_index(key)
 
         if self.buckets[idx].get_length() > 0:
@@ -162,8 +177,10 @@ class HashTable:
 
         Implement this.
         """
-        new_buckets = [HashLinkedList()] * new_capacity
+        new_buckets = [None] * new_capacity
         self.capacity = new_capacity
+        for idx in range(new_capacity):
+            new_buckets[idx] = HashLinkedList()
 
         for linked_list in range(len(self.buckets)):
             curr_node = self.buckets[linked_list].head
