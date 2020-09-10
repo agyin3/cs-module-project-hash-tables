@@ -1,13 +1,4 @@
-class HashTableEntry:
-    """
-    Linked List hash table key/value pair
-    """
-    def __init__(self, key, value):
-        self.key = key
-        self.value = value
-        self.next = None
-
-
+from HashLinkedList import HashTableEntry, HashLinkedList
 # Hash table can't have fewer than this many slots
 MIN_CAPACITY = 8
 
@@ -21,8 +12,11 @@ class HashTable:
     """
 
     def __init__(self, capacity):
-        self.capacity = capacity
-        self.buckets = [None] * self.capacity
+        if capacity > MIN_CAPACITY:
+            self.capacity = capacity
+        else:
+            self.capacity = MIN_CAPACITY
+        self.buckets = [HashLinkedList()] * self.capacity
 
 
     def get_num_slots(self):
@@ -97,7 +91,14 @@ class HashTable:
         Implement this.
         """
         idx = self.hash_index(key)
-        self.buckets[idx] = value
+        existing_node = self.buckets[idx].contains(key)
+
+        if existing_node is not None:
+            existing_node.set_value(value)
+
+        else:
+            self.buckets[idx].add_to_tail(key, value)
+            
 
 
 
@@ -111,11 +112,31 @@ class HashTable:
         """
         idx = self.hash_index(key)
 
-        if self.buckets[idx] is not None:
-            self.buckets[idx] = None
+        if self.buckets[idx].get_length() > 0:
+            node = self.buckets[idx].contains(key)
+
+            if node is not None:
+                self.buckets[idx].delete(node)
+            
+            else:
+                raise Exception('invalid key provided')
 
         else:
             raise Exception('invalid key provided')
+
+        # if self.buckets[idx] is not None:
+        #     node = self.buckets[idx].contains(key)
+
+        #     if node is not None:
+        #         self.buckets[idx].delete(node)
+
+        #         if self.buckets[idx].get_length() < 1:
+        #             self.buckets[idx] = None
+        #     else:
+        #         raise Exception('invalid key provided')
+
+        # else:
+        #     raise Exception('invalid key provided')
         
 
 
@@ -129,7 +150,9 @@ class HashTable:
         """
         idx = self.hash_index(key)
 
-        return self.buckets[idx]
+        node = self.buckets[idx].contains(key)
+
+        return node.get_value() if node is not None else None
 
 
     def resize(self, new_capacity):
@@ -139,11 +162,22 @@ class HashTable:
 
         Implement this.
         """
-        # new_buckets = [None] * new_capacity
+        new_buckets = [HashLinkedList()] * new_capacity
+        self.capacity = new_capacity
 
-        # create new array
-        # find all non None indices
-        # reverse hash 
+        for linked_list in range(len(self.buckets)):
+            curr_node = self.buckets[linked_list].head
+
+            while curr_node is not None:
+
+                key = curr_node.get_key()
+                val = curr_node.get_value()
+                new_idx = self.hash_index(key)
+                new_buckets[new_idx].add_to_tail(key, val)
+                curr_node = curr_node.get_next()
+            
+        
+        self.buckets = new_buckets
 
 
 
