@@ -1,13 +1,4 @@
-class HashTableEntry:
-    """
-    Linked List hash table key/value pair
-    """
-    def __init__(self, key, value):
-        self.key = key
-        self.value = value
-        self.next = None
-
-
+from HashLinkedList import HashTableEntry, HashLinkedList
 # Hash table can't have fewer than this many slots
 MIN_CAPACITY = 8
 
@@ -21,7 +12,14 @@ class HashTable:
     """
 
     def __init__(self, capacity):
-        # Your code here
+        if capacity > MIN_CAPACITY:
+            self.capacity = capacity
+        else:
+            self.capacity = MIN_CAPACITY
+        
+        self.buckets = [None] * self.capacity
+        for idx in range(self.capacity):
+            self.buckets[idx] = HashLinkedList()
 
 
     def get_num_slots(self):
@@ -34,7 +32,7 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        return len(self.buckets)
 
 
     def get_load_factor(self):
@@ -43,7 +41,11 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        count = 0
+        for ll in self.buckets:
+            count += ll.get_length()
+        
+        return count / self.get_num_slots()
 
 
     def fnv1(self, key):
@@ -62,7 +64,16 @@ class HashTable:
 
         Implement this, and/or FNV-1.
         """
-        # Your code here
+
+        # Initialize hash variable
+        hash = 5381
+
+        # Loop through each character in the key
+        for char in key:
+            # << shifts bits to the left
+            hash = ((hash << 5) + hash) + ord(char)
+
+        return hash & 0xFFFFFFFF 
 
 
     def hash_index(self, key):
@@ -81,7 +92,22 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        load_factor = self.get_load_factor()
+
+        if load_factor >= 0.7:
+            new_capacity = self.capacity * 2
+            self.resize(new_capacity)
+
+        idx = self.hash_index(key)
+        existing_node = self.buckets[idx].contains(key)
+
+        if existing_node is not None:
+            existing_node.set_value(value)
+
+        else:
+            self.buckets[idx].add_to_tail(key, value)
+            
+
 
 
     def delete(self, key):
@@ -92,7 +118,41 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+
+        load_factor = self.get_load_factor()
+
+        if load_factor <= 0.2:
+            new_capacity = self.capacity // 2
+            self.resize(new_capacity)
+
+        idx = self.hash_index(key)
+
+        if self.buckets[idx].get_length() > 0:
+            node = self.buckets[idx].contains(key)
+
+            if node is not None:
+                self.buckets[idx].delete(node)
+            
+            else:
+                raise Exception('invalid key provided')
+
+        else:
+            raise Exception('invalid key provided')
+
+        # if self.buckets[idx] is not None:
+        #     node = self.buckets[idx].contains(key)
+
+        #     if node is not None:
+        #         self.buckets[idx].delete(node)
+
+        #         if self.buckets[idx].get_length() < 1:
+        #             self.buckets[idx] = None
+        #     else:
+        #         raise Exception('invalid key provided')
+
+        # else:
+        #     raise Exception('invalid key provided')
+        
 
 
     def get(self, key):
@@ -103,7 +163,11 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        idx = self.hash_index(key)
+
+        node = self.buckets[idx].contains(key)
+
+        return node.get_value() if node is not None else None
 
 
     def resize(self, new_capacity):
@@ -113,7 +177,24 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
+        new_buckets = [None] * new_capacity
+        self.capacity = new_capacity
+        for idx in range(new_capacity):
+            new_buckets[idx] = HashLinkedList()
+
+        for linked_list in range(len(self.buckets)):
+            curr_node = self.buckets[linked_list].head
+
+            while curr_node is not None:
+
+                key = curr_node.get_key()
+                val = curr_node.get_value()
+                new_idx = self.hash_index(key)
+                new_buckets[new_idx].add_to_tail(key, val)
+                curr_node = curr_node.get_next()
+            
+        
+        self.buckets = new_buckets
 
 
 
